@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -16,7 +18,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'messenger_id'
     ];
 
     /**
@@ -36,4 +38,19 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function ownedRooms(): HasMany {
+        return $this->hasMany('App\Room', 'owner_id', 'id');
+    }
+
+    public function rooms(): BelongsToMany {
+        return $this
+            ->belongsToMany('App\Room', 'room_members', 'user_id', 'room_id')
+            ->withTimestamps();;
+    }
+
+    public function votes(): HasMany {
+        return $this->hasMany('App\Vote');
+    }
+
 }

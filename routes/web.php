@@ -14,3 +14,8 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+# routes used by authentication module
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
