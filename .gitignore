@@ -21,3 +21,6 @@ Homestead.json
 
 # PhpStorm
 .idea/
+
+# phpunit
+.phpunit.result.cache
