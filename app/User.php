@@ -49,4 +49,8 @@ class User extends Authenticatable
             ->withTimestamps();;
     }
 
+    public function votes(): HasMany {
+        return $this->hasMany('App\Vote');
+    }
+
 }

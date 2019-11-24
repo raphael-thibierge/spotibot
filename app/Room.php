@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
@@ -34,6 +35,10 @@ class Room extends Model
         return $this
             ->belongsToMany('App\User', 'room_members', 'room_id', 'user_id')
             ->withTimestamps();;
+    }
+
+    public function room(): HasMany {
+        return $this->hasMany('App\Plays');
     }
 
 }
