@@ -1,0 +1,2 @@
+# spotibot
+Spotify bot
