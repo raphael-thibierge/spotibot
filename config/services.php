@@ -30,4 +30,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'spotify' => [
+        'client_id' => env('SPOTIFY_KEY'),
+        'client_secret' => env('SPOTIFY_SECRET'),
+        'redirect' => env('SPOTIFY_REDIRECT_URI')
+    ],
+
 ];

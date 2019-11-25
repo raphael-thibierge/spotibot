@@ -11,7 +11,9 @@
         "php": "^7.2",
         "fideloper/proxy": "^4.0",
         "laravel/framework": "^6.2",
-        "laravel/tinker": "^1.0"
+        "laravel/socialite": "^4.3",
+        "laravel/tinker": "^1.0",
+        "socialiteproviders/spotify": "^3.0"
     },
     "require-dev": {
         "codedungeon/phpunit-result-printer": "^0.26.2",
