@@ -15,7 +15,7 @@ class CreatePlaysTable extends Migration
     {
         Schema::create('plays', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->dateTime('payed_at');
+            $table->dateTime('played_at');
             $table->timestamps();
 
             $table->unsignedBigInteger('room_id');

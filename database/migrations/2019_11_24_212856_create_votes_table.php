@@ -18,8 +18,9 @@ class CreateVotesTable extends Migration
             $table->boolean('value'); // true -> upvote, false -> downvote
             $table->timestamps();
             $table->unsignedBigInteger('play_id');
+            $table->foreign('play_id')->references('id')->on('plays');
             $table->unsignedBigInteger('user_id');
-
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
