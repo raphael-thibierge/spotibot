@@ -56,7 +56,7 @@ class LoginController extends Controller
     public function handleProviderCallback()
     {
         $user = Socialite::driver('spotify')->user();
-
+        // TODO Hey Aubin ! continue here !
         // $user->token;
     }
 }
