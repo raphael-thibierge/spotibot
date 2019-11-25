@@ -22,7 +22,7 @@ class CreateSpotifyClientsTable extends Migration
             $table->string('spotify_refresh_token')->nullable();
 
             //Other data
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('user_id')->references('id')->on('users');
             $table->dateTime('expires_at');
             $table->timestamps();
         });
