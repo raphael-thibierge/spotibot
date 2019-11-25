@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -46,11 +47,14 @@ class User extends Authenticatable
     public function rooms(): BelongsToMany {
         return $this
             ->belongsToMany('App\Room', 'room_members', 'user_id', 'room_id')
-            ->withTimestamps();;
+            ->withTimestamps();
     }
 
     public function votes(): HasMany {
         return $this->hasMany('App\Vote');
     }
 
+    public function spotifyClient(): HasOne {
+        return $this->hasOne('App\SpotifyClient');
+    }
 }

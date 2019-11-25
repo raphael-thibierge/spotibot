@@ -17,7 +17,7 @@ class CreateSpotifyClientsTable extends Migration
             $table->bigIncrements('id');
 
             //Spotify
-            $table->string('spotify_id');
+            $table->string('spotify_id')->nullable();
             $table->string('spotify_access_token')->nullable();
             $table->string('spotify_refresh_token')->nullable();
 
