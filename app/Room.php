@@ -37,8 +37,8 @@ class Room extends Model
             ->withTimestamps();;
     }
 
-    public function room(): HasMany {
-        return $this->hasMany('App\Plays');
+    public function plays(): HasMany {
+        return $this->hasMany('App\Play');
     }
 
 }

@@ -8,13 +8,13 @@ class Vote extends Model
 {
     protected $table = 'votes';
 
-    protected $fillable = 'value';
+    protected $fillable = ['value'];
 
     public function play(){
-        $this->belongsTo('App\Play');
+        return $this->belongsTo('App\Play');
     }
 
     public function user(){
-        $this->belongsTo('App\User');
+        return $this->belongsTo('App\User');
     }
 }
