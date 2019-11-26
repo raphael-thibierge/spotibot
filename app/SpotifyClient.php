@@ -57,10 +57,21 @@ class SpotifyClient extends Model
     }
 
     //Manually Refresh Token
-    public function refreshToken()
-    {
+    public function refreshToken(){
         $this->session->refreshAccessToken($this->refreshToken());
         $this->spotify_access_token = $this->session->getAccessToken();
         $this->spotify_refresh_token = $this->session->getRefreshToken();
     }
+
+    //Get Track Infos From API
+    //Test ID = 3n3Ppam7vgaVa1iaRUc9Lp
+    public function getTrackInfos($trackId){
+        return $this->apiClient->getTrack($trackId);
+    }
+    //Return Top Tracks from an artist
+    //Test ID = 43ZHCT0cAZBISjO8DG9PnE
+    public function getArtistTopTracks($artistId){
+        return $this->apiClient->getArtistTopTracks($artistId, [ 'country' => 'fr']);
+    }
+
 }
