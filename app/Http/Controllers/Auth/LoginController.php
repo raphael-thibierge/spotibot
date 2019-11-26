@@ -60,14 +60,12 @@ class LoginController extends Controller
         $spotifyUserData = Socialite::driver('spotify')->user();
         $user = Auth::user();
         $dateExpirationToken = now()->addSeconds($spotifyUserData->expiresIn);
-        $spotifyClient = $user->spotifyClient()->create([
+        $user->spotifyClient()->create([
             'spotify_id'=> $spotifyUserData->id,
             'spotify_access_token'=> $spotifyUserData->token,
             'spotify_refresh_token'=> $spotifyUserData->refreshToken,
             'expires_at' => $dateExpirationToken
         ]);
-        $spotifyClient->createApiClient();
-        $spotifyClient->enableAutoRefreshToken();
         return redirect()->route('home');
     }
 }

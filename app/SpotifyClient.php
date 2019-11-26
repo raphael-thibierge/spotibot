@@ -2,11 +2,18 @@
 
 namespace App;
 
+use App\Exceptions\NullSpotifyAccessTokenException;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 use SpotifyWebAPI\SpotifyWebAPI;
 
+/**
+ * @property mixed expires_at
+ * @property string refresh_token
+ * @property string access_token
+ */
 class SpotifyClient extends Model
 {
     /**
@@ -19,59 +26,106 @@ class SpotifyClient extends Model
      * Table fillable attributes
      * @var array
      */
-    protected $fillable = ['spotify_id', 'spotify_access_token', 'spotify_refresh_token', 'expires_at'];
+    protected $fillable = ['spotify_id', 'access_token', 'refresh_token', 'expires_at'];
 
     protected $dates = [
         'expires_at',
     ];
 
-    //Manage Spotify API Attributes
-    protected $apiClient, $session;
+    /**
+     * Spotify client to interact with API
+     * @var SpotifyWebAPI
+     */
+    private $apiClient;
 
+    /**
+     * User relationship
+     * @return BelongsTo
+     */
     public function user(): BelongsTo{
         return $this->belongsTo('App\User', 'user_id', 'id');
     }
 
-    //Instantiate API Client
-    public function createApiClient(){
-        $this->apiClient = new SpotifyWebAPI();
-        $this->apiClient->setAccessToken($this->spotify_access_token);
+    /**
+     * @throws NullSpotifyAccessTokenException
+     */
+    public function configureSpotifySession(): \SpotifyWebAPI\Session{
+
+        // instantiate new Spotify session
+        $session = new \SpotifyWebAPI\Session(
+            config('services.spotify.client_id'),
+            config('services.spotify.client_secret')
+        );
+
+        // check if access token exists
+        if ($this->spotify_access_token == null){
+            throw new NullSpotifyAccessTokenException();
+        }
+
+        // configure Spotify session
+        $session->setAccessToken($this->access_token);
+        $session->setRefreshToken($this->refresh_token);
+
+        // return ready spotify session
+        return $session;
     }
 
-    public function createSessionApiClient(){
-        $this->session = new SpotifyWebAPI\Session(
-            env('SPOTIFY_KEY'),
-            env('SPOTIFY_SECRET')
-        );
-    }
-    // Return Current API Client
-    public function getApiClient(){
+    /**
+     * Return Current API Client
+     * @return SpotifyWebAPI
+     * @throws NullSpotifyAccessTokenException
+     */
+    public function getApiClient(): SpotifyWebAPI{
+
+        // configure Spotify client if necessary
+        if($this->apiClient === null){
+            $this->apiClient = new SpotifyWebAPI();
+            // prepare Spotify session
+            $this->apiClient->setSession($this->configureSpotifySession());
+            // activate auto refresh token
+            $this->apiClient->setOptions([
+                'auto_refresh' => true,
+            ]);
+        }
+
         return $this->apiClient;
     }
 
-    //Enable auto refresh token
-    public function enableAutoRefreshToken(){
-        $this->apiClient->setOptions([
-            'auto_refresh' => true,
-        ]);
-    }
-
-    //Manually Refresh Token
+    /**
+     * Refresh token manually
+     * @throws NullSpotifyAccessTokenException
+     * @throws \Exception
+     */
     public function refreshToken(){
-        $this->session->refreshAccessToken($this->refreshToken());
-        $this->spotify_access_token = $this->session->getAccessToken();
-        $this->spotify_refresh_token = $this->session->getRefreshToken();
+        $session = $this->configureSpotifySession();
+        $session->refreshAccessToken();
+        $this->access_token = $session->getAccessToken();
+        $this->refresh_token = $session->getRefreshToken();
+        $this->expires_at = new Carbon($session->getTokenExpiration());
     }
 
-    //Get Track Infos From API
-    //Test ID = 3n3Ppam7vgaVa1iaRUc9Lp
+    /**
+     * Get Track Infos From API
+     * Test ID = 3n3Ppam7vgaVa1iaRUc9Lp
+     * @todo delete this function because it's useless
+     * @param $trackId
+     * @return array|object
+     * @throws NullSpotifyAccessTokenException
+     */
     public function getTrackInfos($trackId){
-        return $this->apiClient->getTrack($trackId);
+        return $this->getApiClient()->getTrack($trackId);
     }
-    //Return Top Tracks from an artist
-    //Test ID = 43ZHCT0cAZBISjO8DG9PnE
+
+    /**
+     * Return Top Tracks from an artist
+     * Test ID = 43ZHCT0cAZBISjO8DG9PnE
+     * @todo delete this function because it's useless
+     * @param $artistId
+     * @return array|object
+     * @throws NullSpotifyAccessTokenException
+     */
     public function getArtistTopTracks($artistId){
-        return $this->apiClient->getArtistTopTracks($artistId, [ 'country' => 'fr']);
+        return $this->getApiClient()->getArtistTopTracks($artistId, ['country' => 'fr']);
     }
 
 }
