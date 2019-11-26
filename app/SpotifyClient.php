@@ -4,6 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
+use SpotifyWebAPI\SpotifyWebAPI;
 
 class SpotifyClient extends Model
 {
@@ -23,8 +25,42 @@ class SpotifyClient extends Model
         'expires_at',
     ];
 
+    //Manage Spotify API Attributes
+    protected $apiClient, $session;
+
     public function user(): BelongsTo{
         return $this->belongsTo('App\User', 'user_id', 'id');
     }
 
+    //Instantiate API Client
+    public function createApiClient(){
+        $this->apiClient = new SpotifyWebAPI();
+        $this->apiClient->setAccessToken($this->spotify_access_token);
+    }
+
+    public function createSessionApiClient(){
+        $this->session = new SpotifyWebAPI\Session(
+            env('SPOTIFY_KEY'),
+            env('SPOTIFY_SECRET')
+        );
+    }
+    // Return Current API Client
+    public function getApiClient(){
+        return $this->apiClient;
+    }
+
+    //Enable auto refresh token
+    public function enableAutoRefreshToken(){
+        $this->apiClient->setOptions([
+            'auto_refresh' => true,
+        ]);
+    }
+
+    //Manually Refresh Token
+    public function refreshToken()
+    {
+        $this->session->refreshAccessToken($this->refreshToken());
+        $this->spotify_access_token = $this->session->getAccessToken();
+        $this->spotify_refresh_token = $this->session->getRefreshToken();
+    }
 }
