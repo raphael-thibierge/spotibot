@@ -21,12 +21,12 @@ class VoteTest extends TestCase
     public function testUserRelationShip()
     {
         $user = factory(User::class)->create();
-	$room = $user->ownedRooms()->create(factory(Room::class)->make()->toArray());
-	$track = factory(Track::class)->create();
+	    $room = $user->ownedRooms()->create(factory(Room::class)->make()->toArray());
+	    $track = factory(Track::class)->create();
         $play = factory(Play::class)->make(['track_id' => $track->id, 'added_by_user_id' => $user->id, 'room_id' => $room, 'played_at' => \Carbon\Carbon::now()]);
         $play->save();
 
-	$vote = factory(Vote::class)->create(['user_id' => $user->id, 'play_id' => $play->id]);
+	    $vote = factory(Vote::class)->create(['user_id' => $user->id, 'play_id' => $play->id]);
         
 
         $this->assertEquals($user->id, $vote->user->id);
