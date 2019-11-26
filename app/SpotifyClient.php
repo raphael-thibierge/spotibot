@@ -49,7 +49,7 @@ class SpotifyClient extends Model
     /**
      * @throws NullSpotifyAccessTokenException
      */
-    public function configureSpotifySession(): \SpotifyWebAPI\Session{
+    private function configureSpotifySession(): \SpotifyWebAPI\Session{
 
         // instantiate new Spotify session
         $session = new \SpotifyWebAPI\Session(
