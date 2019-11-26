@@ -19,6 +19,10 @@ class SpotifyClient extends Model
      */
     protected $fillable = ['spotify_id', 'spotify_access_token', 'spotify_refresh_token', 'expires_at'];
 
+    protected $dates = [
+        'expires_at',
+    ];
+
     public function user(): BelongsTo{
         return $this->belongsTo('App\User', 'user_id', 'id');
     }
