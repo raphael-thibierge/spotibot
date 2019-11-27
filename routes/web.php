@@ -22,3 +22,5 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/spotify', 'Auth\LoginController@redirectToProvider');
 Route::get('login/spotify/callback', 'Auth\LoginController@handleProviderCallback');
+
+Route::post('/dialogflow/webhook', 'DialogflowController@handleWebhookRequest');
