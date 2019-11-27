@@ -31,6 +31,6 @@ class CreateRoomMembersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('room-members');
+        Schema::dropIfExists('room_members');
     }
 }

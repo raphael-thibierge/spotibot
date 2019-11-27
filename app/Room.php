@@ -34,11 +34,11 @@ class Room extends Model
     public function members(): BelongsToMany {
         return $this
             ->belongsToMany('App\User', 'room_members', 'room_id', 'user_id')
-            ->withTimestamps();;
+            ->withTimestamps();
     }
 
-    public function room(): HasMany {
-        return $this->hasMany('App\Plays');
+    public function plays(): HasMany {
+        return $this->hasMany('App\Play');
     }
 
 }

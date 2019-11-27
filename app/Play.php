@@ -11,6 +11,8 @@ class Play extends Model
 {
     protected $table = 'plays';
 
+    protected $fillable = ['played_at', 'track_id', 'room_id', 'added_by_user_id'];
+
     protected $dates = ['played_at'];
 
     public function addedBy(): BelongsTo {
@@ -26,6 +28,6 @@ class Play extends Model
     }
 
     public function votes(): HasMany {
-        return $this->hasMany('App/Votes');
+        return $this->hasMany('App\Vote');
     }
 }
