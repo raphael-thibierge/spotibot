@@ -14,6 +14,7 @@
         "jwilsson/spotify-web-api-php": "^2.12",
         "laravel/framework": "^6.2",
         "laravel/socialite": "^4.3",
+        "laravel/telescope": "^2.1",
         "laravel/tinker": "^1.0",
         "socialiteproviders/spotify": "^3.0"
     },
