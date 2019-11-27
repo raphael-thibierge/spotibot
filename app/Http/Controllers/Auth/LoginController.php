@@ -62,8 +62,8 @@ class LoginController extends Controller
         $dateExpirationToken = now()->addSeconds($spotifyUserData->expiresIn);
         $user->spotifyClient()->create([
             'spotify_id'=> $spotifyUserData->id,
-            'spotify_access_token'=> $spotifyUserData->token,
-            'spotify_refresh_token'=> $spotifyUserData->refreshToken,
+            'access_token'=> $spotifyUserData->token,
+            'refresh_token'=> $spotifyUserData->refreshToken,
             'expires_at' => $dateExpirationToken
         ]);
         return redirect()->route('home');
