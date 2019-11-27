@@ -58,7 +58,7 @@ class SpotifyClient extends Model
         );
 
         // check if access token exists
-        if ($this->spotify_access_token == null){
+        if ($this->access_token == null){
             throw new NullSpotifyAccessTokenException();
         }
 
