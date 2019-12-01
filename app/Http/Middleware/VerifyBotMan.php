@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Support\Facades\Log;
+use function Psy\debug;
 
 class VerifyBotMan
 {
@@ -15,10 +17,11 @@ class VerifyBotMan
      */
     public function handle($request, Closure $next)
     {
-        if ($request->input('hub_mode') === 'subscribe'
-            && $request->input('hub_verify_token') === config('services.facebook.verification'))
+        Log::debug($request->toArray());
+        if ($request->input('hub.mode') === 'subscribe'
+            && $request->input('hub.verify_token') === config('services.facebook.verification'))
         {
-            return response($request->input('hub_challenge'), 200);
+            return response($request->input('hub.challenge'), 200);
         }
 
         return $next($request);

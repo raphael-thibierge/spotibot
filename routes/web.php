@@ -28,18 +28,18 @@ Route::get('login/spotify/callback', 'Auth\LoginController@handleProviderCallbac
 // botman
 Route::match(['get', 'post'], '/botman', 'BotManController@handleWebhookRequest')->middleware('botman');
 
-Route::match(['get', 'post'], '/botman/authorize', 'MessengerAccountLinkingController@showMessengerLoginForm')
-    ->middleware('botman')
-    ->name('botman.authorize');
-
+//Route::match(['get', 'post'], '/botman/authorize', 'MessengerAccountLinkingController@showMessengerLoginForm')
+//    ->middleware('botman')
+//    ->name('botman.authorize');
+//
 //Route::post('/botman/authorize', 'MessengerAccountLinkingController@authorizePost')
 //    ->middleware('botman')
 //    ->name('botman.authorize.post');
 //
-Route::get('/botman/confirm', 'MessengerAccountLinkingController@showConfirm')
-    ->middleware('botman')
-    ->name('botman.confirm.show');
-
+//Route::get('/botman/confirm', 'MessengerAccountLinkingController@showConfirm')
+//    ->middleware('botman')
+//    ->name('botman.confirm.show');
+//
 //Route::post('/botman/confirm', 'MessengerAccountLinkingController@confirm')
 //    ->middleware('botman')
 //    ->name('botman.confirm');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use Doctrine\DBAL\Driver;
 use Illuminate\Http\Request;
 use BotMan\BotMan\BotMan;
@@ -16,10 +17,8 @@ use BotMan\Drivers\Facebook\FacebookDriver;
 
 class BotManController extends Controller
 {
-
     public function handleWebhookRequest(Request $request){
         // todo process request
-        // check Edsound
         DriverManager::loadDriver(FacebookDriver::class);
         $config = [
             'facebook' => [
@@ -33,7 +32,16 @@ class BotManController extends Controller
 
         $dialogflow = ApiAi::create(config('services.dialogflow.api_key'))->listenForAction();
 
-        return response()->json($botman);
-    }
+        self::check_linking($request, $botman);
 
+        // Apply global "received" middleware
+        $botman->middleware->received($dialogflow);
+
+        // welcome intent action
+        $botman->hears('hi', function (BotMan $bot){
+            $bot->reply('Hello What do you want to do ?');
+        });
+
+        $botman->listen();
+    }
 }
