@@ -28,6 +28,36 @@ class MessengerAccountLinkingController extends Controller
     }
 
     /**
+     * @param Request $request
+     * @return mixed
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function confirm(Request $request){
+
+        $this->validate($request, [
+            'redirect_uri' => 'required'
+        ]);
+
+        $postConfirmUser = Auth::user();
+
+        if ($request->session()->has('messenger_sender_id')){
+
+            $senderId = $request->session()->get('messenger_sender_id');
+
+            $messagerSenderUser = BotManController::functionFindOrCreateUser($senderId);
+
+            // not same account
+            if ($postConfirmUser->messenger_sender_id !== $messagerSenderUser->messenger_sender_id){
+                $messagerSenderUser->merge($messagerSenderUser);
+                $messagerSenderUser->save();
+                $postConfirmUser->delete();
+            }
+        }
+
+        return Redirect::to($request->get('redirect_uri') . '&authorization_code=' . $postConfirmUser->id);
+    }
+
+    /**
      * Display confirm account linking
      *
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View

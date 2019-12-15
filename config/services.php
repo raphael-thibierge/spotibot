@@ -43,6 +43,6 @@ return [
     ],
 
     'dialogflow' => [
-        'api_key' => env('DIALOGFLOW_API_KEY')
-    ]
+        'api_key' => env('DIALOGFLOW_API_KEY'),
+    ],
 ];
