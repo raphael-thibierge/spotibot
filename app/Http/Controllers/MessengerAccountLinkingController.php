@@ -12,7 +12,7 @@ class MessengerAccountLinkingController extends Controller
      * Display login form for messenger account linking
      *
      * @param Request $request
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\View\View
      */
     public function showMessengerLoginForm(Request $request)
     {
@@ -39,21 +39,20 @@ class MessengerAccountLinkingController extends Controller
         ]);
 
         $postConfirmUser = Auth::user();
+        if ($request->session()->has('messenger_id')){
 
-        if ($request->session()->has('messenger_sender_id')){
-
-            $senderId = $request->session()->get('messenger_sender_id');
+            $senderId = $request->session()->get('messenger_id');
 
             $messagerSenderUser = BotManController::functionFindOrCreateUser($senderId);
 
             // not same account
-            if ($postConfirmUser->messenger_sender_id !== $messagerSenderUser->messenger_sender_id){
+            if ($postConfirmUser->messenger_id !== $messagerSenderUser->messenger_id){
                 $messagerSenderUser->merge($messagerSenderUser);
                 $messagerSenderUser->save();
                 $postConfirmUser->delete();
             }
         }
-
+        //dd($request->get('redirect_uri'));
         return Redirect::to($request->get('redirect_uri') . '&authorization_code=' . $postConfirmUser->id);
     }
 

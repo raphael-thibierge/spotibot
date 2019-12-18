@@ -20,26 +20,24 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-Route::get('/spotify', 'Auth\LoginController@redirectToProvider');
+Route::get('/spotify', 'Auth\LoginController@redirectToProvider')->name('spotify.login');
 Route::get('login/spotify/callback', 'Auth\LoginController@handleProviderCallback');
-
-//Route::post('/dialogflow/webhook', 'BotManController@handleWebhookRequest');
 
 // botman
 Route::match(['get', 'post'], '/botman', 'BotManController@handleWebhookRequest')->middleware('botman');
 
-//Route::match(['get', 'post'], '/botman/authorize', 'MessengerAccountLinkingController@showMessengerLoginForm')
-//    ->middleware('botman')
-//    ->name('botman.authorize');
-//
-//Route::post('/botman/authorize', 'MessengerAccountLinkingController@authorizePost')
-//    ->middleware('botman')
-//    ->name('botman.authorize.post');
-//
-//Route::get('/botman/confirm', 'MessengerAccountLinkingController@showConfirm')
-//    ->middleware('botman')
-//    ->name('botman.confirm.show');
-//
-//Route::post('/botman/confirm', 'MessengerAccountLinkingController@confirm')
-//    ->middleware('botman')
-//    ->name('botman.confirm');
+Route::match(['get', 'post'], '/botman/authorize', 'MessengerAccountLinkingController@showMessengerLoginForm')
+    ->middleware('botman')
+    ->name('botman.authorize');
+
+Route::post('/botman/authorize', 'MessengerAccountLinkingController@authorizePost')
+    ->middleware('botman')
+    ->name('botman.authorize.post');
+
+Route::get('/botman/confirm', 'MessengerAccountLinkingController@showConfirm')
+    ->middleware('botman')
+    ->name('botman.confirm.show');
+
+Route::post('/botman/confirm', 'MessengerAccountLinkingController@confirm')
+    ->middleware('botman')
+    ->name('botman.confirm');
