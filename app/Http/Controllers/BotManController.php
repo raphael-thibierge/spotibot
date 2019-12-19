@@ -6,6 +6,7 @@ use App\Http\Services\SpotifyService;
 use App\User;
 use BotMan\BotMan\Middleware\Dialogflow;
 use BotMan\Drivers\Dialogflow\DialogflowDriver;
+use BotMan\Drivers\Facebook\Extensions\ListTemplate;
 use Doctrine\DBAL\Driver;
 use GPBMetadata\Google\Api\Auth;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ use BotMan\Drivers\Facebook\FacebookDriver;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\ErrorHandler\Debug;
 
 class BotManController extends Controller
 {
@@ -59,9 +61,6 @@ class BotManController extends Controller
         $botman->hears('input.welcome', function (BotMan $bot) use ($request) {
             $extras = $bot->getMessage()->getExtras();
             $apiReply = $extras['apiReply'];
-            $apiAction = $extras['apiAction'];
-            $apiIntent = $extras['apiIntent'];
-
             $bot->reply($apiReply);
         })->middleware($dialogflow);
 
@@ -92,6 +91,26 @@ class BotManController extends Controller
             $bot->reply($this->logout_button());
         })->middleware($dialogflow);
 
+        $botman->hears('song.search', function (BotMan $bot){
+            $extras = $bot->getMessage()->getExtras();
+            $apiReply = $extras['apiReply'];
+            $apiParameters = $extras['apiParameters'];
+            $bot->reply($apiReply);
+
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+
+            if ($user == null)
+                $bot->reply('Vous n\'êtes pas connecté');
+            else{
+                $tracks = $user->spotifyClient->getApiClient()->search($apiParameters['title'], 'track')->tracks->items;
+            }
+
+            if($tracks != null)
+                $bot->reply($this->searchResultTemplate($tracks));
+            else
+                $bot->reply('Aucun résultat trouvé..');
+        })->middleware($dialogflow);
+
         // default response
         $botman->fallback(function (BotMan $bot) {
             $bot->reply("Je ne comprends pas...");
@@ -115,9 +134,7 @@ class BotManController extends Controller
 
 
     public static function check_linking(Request $request, &$botman){
-
         // try to get the message
-        Log:info($request);
         try {
             $message = $request->only(['entry'])['entry'][0]['messaging'][0];
             $sender_id = $message['sender']['id'];
@@ -175,5 +192,27 @@ class BotManController extends Controller
                             ->type('account_unlink')
                     )
             ]);
+    }
+
+    private function getUserFromSenderId($senderId){
+        //$senderId = $request->get('message')[0]['sender']['id'];
+        return User::where('messenger_id', $senderId)->first();
+    }
+
+    private function searchResultTemplate($tracks){
+        $genericTemplate = GenericTemplate::create()->addImageAspectRatio(GenericTemplate::RATIO_SQUARE);
+        for( $i =0; $i<4; $i++ ){
+            $name = $tracks[$i]->name;
+            if( sizeof($tracks[$i]->artists) != 1)
+                foreach ($tracks[$i]->artists as $artist)
+                    $artistName = $artist->name . ' ';
+            else
+                $artistName = $tracks[$i]->artists[0]->name;
+            $albumName = $tracks[$i]->album->name;
+            //Cover miniature
+            $coverImgUrl = $tracks[$i]->album->images[0]->url;
+            $genericTemplate->addElement(Element::create($name)->subtitle($artistName. ' - ' . $albumName)->image($coverImgUrl));
+        }
+        return $genericTemplate;
     }
 }
