@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
+
     /**
      * SQL table name
      * @var string
@@ -25,12 +27,22 @@ class Room extends Model
      * Date attributes to cast
      * @var array
      */
-    protected $dates = ['created_at', 'updated_ad'];
+    protected $dates = ['created_at', 'updated_at'];
 
+    /**
+     * Playlist's creator
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function owner(): BelongsTo{
         return $this->belongsTo('App\User', 'owner_id', 'id');
     }
 
+    /**
+     * Playlist's guests
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function members(): BelongsToMany {
         return $this
             ->belongsToMany('App\User', 'room_members', 'room_id', 'user_id')
@@ -40,5 +52,22 @@ class Room extends Model
     public function plays(): HasMany {
         return $this->hasMany('App\Play');
     }
+
+
+    /**
+     * Open playlist set status to open and save de timestamp
+     */
+    public function open(){
+        $this->open = true;
+    }
+
+    /**
+     * Open playlist set status to open and save de timestamp
+     */
+    public function close(){
+        $this->open = false;
+    }
+
+
 
 }

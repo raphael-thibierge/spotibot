@@ -4,6 +4,7 @@ namespace App;
 
 use App\Exceptions\NullSpotifyAccessTokenException;
 use Carbon\Carbon;
+use GPBMetadata\Google\Api\Log;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +27,7 @@ class SpotifyClient extends Model
      * Table fillable attributes
      * @var array
      */
-    protected $fillable = ['spotify_id', 'access_token', 'refresh_token', 'expires_at'];
+    protected $fillable = ['spotify_id', 'access_token', 'refresh_token', 'expires_at', 'user_data'];
 
     protected $dates = [
         'expires_at',
@@ -76,7 +77,6 @@ class SpotifyClient extends Model
      * @throws NullSpotifyAccessTokenException
      */
     public function getApiClient(): SpotifyWebAPI{
-
         // configure Spotify client if necessary
         if($this->apiClient === null){
             $this->apiClient = new SpotifyWebAPI();
@@ -86,6 +86,8 @@ class SpotifyClient extends Model
             $this->apiClient->setOptions([
                 'auto_refresh' => true,
             ]);
+            $this->user_data = json_encode($this->apiClient->me());
+            $this->save();
         }
 
         return $this->apiClient;
@@ -102,6 +104,17 @@ class SpotifyClient extends Model
         $this->access_token = $session->getAccessToken();
         $this->refresh_token = $session->getRefreshToken();
         $this->expires_at = new Carbon($session->getTokenExpiration());
+        $this->user_data = json_encode($this->getApiClient()->me());
+        $this->save();
     }
 
+    public function isLinkedToSpotify(){
+        return isset($this->access_token) && !empty($this->access_token);
+    }
+
+    public function getSpotifyId(){
+        if ($this->isLinkedToSpotify()){
+            return json_decode($this->user_data)->id;
+        }
+    }
 }

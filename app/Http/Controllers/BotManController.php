@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Services\SpotifyService;
+use App\Playlist;
+use App\Room;
 use App\User;
 use BotMan\BotMan\Middleware\Dialogflow;
 use BotMan\Drivers\Dialogflow\DialogflowDriver;
 use BotMan\Drivers\Facebook\Extensions\ListTemplate;
+use Carbon\Carbon;
 use Doctrine\DBAL\Driver;
 use GPBMetadata\Google\Api\Auth;
 use Illuminate\Http\Request;
@@ -22,6 +25,7 @@ use BotMan\Drivers\Facebook\FacebookDriver;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Keygen\Keygen;
 use Symfony\Component\ErrorHandler\Debug;
 
 class BotManController extends Controller
@@ -101,14 +105,68 @@ class BotManController extends Controller
 
             if ($user == null)
                 $bot->reply('Vous n\'êtes pas connecté');
-            else{
+            else if($user->spotifyClient != null){
                 $tracks = $user->spotifyClient->getApiClient()->search($apiParameters['title'], 'track')->tracks->items;
+                if($tracks != null)
+                    $bot->reply($this->searchResultTemplate($tracks));
+                else
+                    $bot->reply('Aucun résultat trouvé..');
+            }
+            else
+                $bot->reply('Vous n\êtes pas connecté.');
+        })->middleware($dialogflow);
+
+        $botman->hears('playlist.create', function (BotMan $bot) {
+            $bot->types();
+            $extras = $bot->getMessage()->getExtras();
+            $apiReply = $extras['apiReply'];
+            $apiParameters = $extras['apiParameters'];
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            if ($user === null) {
+                $bot->reply('Vous n\êtes pas connecté.');
+                return;
             }
 
-            if($tracks != null)
-                $bot->reply($this->searchResultTemplate($tracks));
-            else
-                $bot->reply('Aucun résultat trouvé..');
+            if ($user->rooms()->where('open', 1)->count() > 0) {
+                $bot->reply("Tu dois d'abord fermer ta playlist actuelle pour en créer une nouvelle");
+            } else {
+                if($apiParameters['name'] != null)
+                    $name = $apiParameters['name'];
+                else
+                    $name = 'Playlist - ' . Carbon::now();
+                $room = new Room;
+                $room->owner_id = $user->id;
+                $room->pin = $this->generateRoomPin();
+                $room->slug = $name;
+                $room->open();
+                $room->save();
+                $api = $user->spotifyClient->getApiClient();
+                $api->createPlaylist(['name' => $name]);
+                $bot->reply('La playlist ' . $name . ' a été créée !');
+                $bot->reply('Copie ce code et envoie le aux participants : ');
+                $bot->reply($room->pin);
+            }
+        })->middleware($dialogflow);
+
+        $botman->hears('playlist.join', function (BotMan $bot){
+            $extras = $bot->getMessage()->getExtras();
+            $apiReply = $extras['apiReply'];
+            $apiParameters = $extras['apiParameters'];
+            $user = $this->getUserFromSenderId($bot->getUser()->getId());
+            $room = Room::where('pin', $apiParameters['pin'])->first();
+            if ($user == null){
+                $bot->reply('Vous devez autoriser Spotibot à communiquer avec vous d\'abord.');
+                $bot->reply($this->login_button());
+            }
+            else {
+                if ($room->open == false)
+                    $bot->reply('Cette playlist est fermée.');
+                else {
+                    $room->members()->attach($user);
+                    $room->save();
+                    $bot->reply('Bienvenue dans la playlist ' . $room->slug . '.');
+                }
+            }
         })->middleware($dialogflow);
 
         // default response
@@ -155,7 +213,7 @@ class BotManController extends Controller
 
                     $user->update(['messenger_id' => $sender_id]);
 
-                    $botman->say("Bienvenue {$user->name} ! Plus qu'à connecter Spotify et en avant la musique.",
+                    $botman->say('"Bienvenue {$user->name} ! Plus qu\'à connecter Spotify et en avant la musique. Si tu veux rejoindre une salle, tape "Rejoindre ###" où ### correspond au code de la playlist.',
                         $sender_id);
                 }
             }
@@ -214,5 +272,13 @@ class BotManController extends Controller
             $genericTemplate->addElement(Element::create($name)->subtitle($artistName. ' - ' . $albumName)->image($coverImgUrl));
         }
         return $genericTemplate;
+    }
+
+    private function generateRoomPin()
+    {
+        $pin = Keygen::numeric(10)->generate();
+        while(Room::where('pin', $pin)->first() != null)
+            $pin = Keygen::numeric(10)->generate();
+        return $pin;
     }
 }
