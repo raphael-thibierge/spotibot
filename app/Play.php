@@ -30,4 +30,5 @@ class Play extends Model
     public function votes(): HasMany {
         return $this->hasMany('App\Vote');
     }
+
 }

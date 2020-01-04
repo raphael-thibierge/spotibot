@@ -21,7 +21,7 @@ class Room extends Model
      * Table fillable attributes
      * @var array
      */
-    protected $fillable = ['open', 'pin', 'slug'];
+    protected $fillable = ['open', 'pin', 'slug', 'spotify_data'];
 
     /**
      * Date attributes to cast
@@ -68,6 +68,13 @@ class Room extends Model
         $this->open = false;
     }
 
-
-
+    /**
+     * Return the Spotify playlist's ID
+     * @return int
+     */
+    public function getPlaylistId(){
+        if(isset($this->spotify_data))
+            return json_decode($this->spotify_data)->id;
+        return '';
+    }
 }
