@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\SpotifyClient;
 use App\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use PHPUnit\Util\Json;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 
 class LoginController extends Controller
 {
@@ -48,8 +50,11 @@ class LoginController extends Controller
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function redirectToProvider()
+    public function redirectToProvider($senderID)
     {
+        $user = User::where('messenger_id', $senderID)->first();
+        Auth::login($user);
+        Log::debug(json_encode($user));
         return Socialite::driver('spotify')->setScopes([
             'user-read-private',
             // playlists
@@ -71,7 +76,7 @@ class LoginController extends Controller
     /**
      * Obtain the user information from Spotify.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function handleProviderCallback()
     {
@@ -91,6 +96,6 @@ class LoginController extends Controller
             $api = $user->spotifyClient->getApiClient();
             $user->spotifyClient->update(['user_data' => json_encode($api->me())]);
         }
-        return redirect()->route('home');
+        return redirect()->route('welcome');
     }
 }

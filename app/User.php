@@ -48,6 +48,7 @@ class User extends Authenticatable
     public function rooms(): BelongsToMany {
         return $this
             ->belongsToMany('App\Room', 'room_members', 'user_id', 'room_id')
+            ->withPivot('active')
             ->withTimestamps();
     }
 

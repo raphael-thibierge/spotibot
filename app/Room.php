@@ -46,6 +46,14 @@ class Room extends Model
     public function members(): BelongsToMany {
         return $this
             ->belongsToMany('App\User', 'room_members', 'room_id', 'user_id')
+            ->withPivot('active')
+            ->withTimestamps();
+    }
+
+    public function activeMembers() : BelongsToMany {
+        return $this
+            ->belongsToMany('App\User', 'room_members', 'room_id', 'user_id')
+            ->wherePivot('active', 1)
             ->withTimestamps();
     }
 

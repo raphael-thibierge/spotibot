@@ -8,7 +8,7 @@ class Vote extends Model
 {
     protected $table = 'votes';
 
-    protected $fillable = ['value'];
+    protected $fillable = ['value', 'play_id', 'user_id'];
 
     public function play(){
         return $this->belongsTo('App\Play');
