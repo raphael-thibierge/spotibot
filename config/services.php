@@ -36,4 +36,13 @@ return [
         'redirect' => env('SPOTIFY_REDIRECT_URI')
     ],
 
+    'facebook' => [
+        'client_token' =>env('FACEBOOK_TOKEN'),
+        'client_secret' =>env('FACEBOOK_APP_SECRET'),
+        'verification' =>env('FACEBOOK_VERIFICATION'),
+    ],
+
+    'dialogflow' => [
+        'api_key' => env('DIALOGFLOW_API_KEY'),
+    ],
 ];

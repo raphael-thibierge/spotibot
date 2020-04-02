@@ -104,28 +104,4 @@ class SpotifyClient extends Model
         $this->expires_at = new Carbon($session->getTokenExpiration());
     }
 
-    /**
-     * Get Track Infos From API
-     * Test ID = 3n3Ppam7vgaVa1iaRUc9Lp
-     * @todo delete this function because it's useless
-     * @param $trackId
-     * @return array|object
-     * @throws NullSpotifyAccessTokenException
-     */
-    public function getTrackInfos($trackId){
-        return $this->getApiClient()->getTrack($trackId);
-    }
-
-    /**
-     * Return Top Tracks from an artist
-     * Test ID = 43ZHCT0cAZBISjO8DG9PnE
-     * @todo delete this function because it's useless
-     * @param $artistId
-     * @return array|object
-     * @throws NullSpotifyAccessTokenException
-     */
-    public function getArtistTopTracks($artistId){
-        return $this->getApiClient()->getArtistTopTracks($artistId, ['country' => 'fr']);
-    }
-
 }
