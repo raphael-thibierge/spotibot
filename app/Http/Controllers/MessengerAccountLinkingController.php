@@ -43,7 +43,7 @@ class MessengerAccountLinkingController extends Controller
 
             $senderId = $request->session()->get('messenger_id');
 
-            $messagerSenderUser = BotManController::functionFindOrCreateUser($senderId);
+            $messagerSenderUser = BotManController::findOrCreateUser($senderId);
 
             // not same account
             if ($postConfirmUser->messenger_id !== $messagerSenderUser->messenger_id){

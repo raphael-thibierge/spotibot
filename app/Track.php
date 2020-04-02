@@ -9,7 +9,7 @@ class Track extends Model
 {
     protected $table = 'tracks';
 
-    protected $fillable = ['name', 's_id', 'cover_url', 'duration'];
+    protected $fillable = ['name', 's_id', 'cover_url', 'duration', 'artist', 'album'];
 
     public function plays(): HasMany{
         return $this->hasMany('App\Play');

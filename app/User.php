@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 
 class User extends Authenticatable
 {
@@ -47,6 +48,7 @@ class User extends Authenticatable
     public function rooms(): BelongsToMany {
         return $this
             ->belongsToMany('App\Room', 'room_members', 'user_id', 'room_id')
+            ->withPivot('active')
             ->withTimestamps();
     }
 
@@ -57,4 +59,13 @@ class User extends Authenticatable
     public function spotifyClient(): HasOne {
         return $this->hasOne('App\SpotifyClient');
     }
+
+    public function getActiveRoom() {
+        $room = $this->ownedRooms->where('open', true)->first();
+        if($room == null){
+            $room = $this->rooms->where('open', true)->first();
+        }
+        return $room;
+    }
+
 }

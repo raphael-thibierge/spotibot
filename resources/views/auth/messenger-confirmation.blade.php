@@ -28,11 +28,9 @@
                     <button type="submit" class="btn btn-success">
                         Confirm
                     </button>
-
                     <a class="btn btn-default" href="{{ isset($_REQUEST['redirect_uri']) ? $_REQUEST['redirect_uri'] : '#'}}">
                         Cancel
                     </a>
-
                 </div>
             </div>
         </form>

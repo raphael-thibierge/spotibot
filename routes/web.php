@@ -13,14 +13,13 @@
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
 # routes used by authentication module
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
-
-Route::get('/spotify', 'Auth\LoginController@redirectToProvider')->name('spotify.login');
+Route::get('/spotify/{senderID}', 'Auth\LoginController@redirectToProvider')->name('spotify.login');
 Route::get('login/spotify/callback', 'Auth\LoginController@handleProviderCallback');
 
 // botman

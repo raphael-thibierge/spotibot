@@ -17,7 +17,6 @@ class VerifyBotMan
      */
     public function handle($request, Closure $next)
     {
-        Log::debug($request->toArray());
         if ($request->input('hub.mode') === 'subscribe'
             && $request->input('hub.verify_token') === config('services.facebook.verification'))
         {

@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\SpotifyClient;
 use App\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
+use PHPUnit\Util\Json;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 
 class LoginController extends Controller
 {
@@ -41,31 +46,56 @@ class LoginController extends Controller
     }
 
     /**
-     * Redirect the user to the GitHub authentication page.
+     * Redirect the user to the Spotify authentication page.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function redirectToProvider()
+    public function redirectToProvider($senderID)
     {
-        return Socialite::driver('spotify')->redirect();
+        $user = User::where('messenger_id', $senderID)->first();
+        Auth::login($user);
+        Log::debug(json_encode($user));
+        return Socialite::driver('spotify')->setScopes([
+            'user-read-private',
+            // playlists
+            'playlist-read-private',
+            'playlist-read-collaborative',
+            'playlist-modify-public',
+            'playlist-modify-private',
+            // user infos
+            'user-read-email',
+            'user-top-read',
+            // user's player
+            'user-read-playback-state', // access to user's player
+            'user-modify-playback-state',
+            'user-read-currently-playing',
+            'user-read-recently-played'
+        ])->redirect();
     }
 
     /**
-     * Obtain the user information from GitHub.
+     * Obtain the user information from Spotify.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function handleProviderCallback()
     {
         $spotifyUserData = Socialite::driver('spotify')->user();
-        $user = Auth::user();
+        $user = Auth::User();
         $dateExpirationToken = now()->addSeconds($spotifyUserData->expiresIn);
-        $user->spotifyClient()->create([
-            'spotify_id'=> $spotifyUserData->id,
-            'access_token'=> $spotifyUserData->token,
-            'refresh_token'=> $spotifyUserData->refreshToken,
-            'expires_at' => $dateExpirationToken
-        ]);
-        return redirect()->route('home');
+        if ($user->spotifyClient != null) {
+            $user->spotifyClient->refreshToken();
+        } else {
+            $user->spotifyClient()->create([
+                'spotify_id' => $spotifyUserData->id,
+                'access_token' => $spotifyUserData->token,
+                'refresh_token' => $spotifyUserData->refreshToken,
+                'expires_at' => $dateExpirationToken,
+                'user_data' => ''
+            ]);
+            $api = $user->spotifyClient->getApiClient();
+            $user->spotifyClient->update(['user_data' => json_encode($api->me())]);
+        }
+        return redirect()->route('welcome');
     }
 }
